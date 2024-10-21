@@ -19,10 +19,14 @@ class SpanManager {
     }
   
     createSpan(spanName) {
-      if (!this.rootSpan || this.numOfSpans === this.spanLimit) {
+      if (this.rootSpan == null) {
+        this.rootSpan = Sentry.getActiveSpan();
+      }
+
+      if (this.numOfSpans === this.spanLimit) {
         this.initializeRootSpan();
       }
-  
+
       Sentry.withActiveSpan(this.rootSpan, () => {
         Sentry.startSpan({ name: `${spanName}_${this.numOfSpans}` }, () => {
           this.numOfSpans++;
