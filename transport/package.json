@@ -1,0 +1,15 @@
+{
+  "name": "transport",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sentry/node": "8.33.1",
+    "express": "^4.18.2"
+  }
+}
