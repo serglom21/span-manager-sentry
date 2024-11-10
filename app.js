@@ -1,6 +1,7 @@
 require('./instrument');
 const express = require('express');
-const Sentry = require('@sentry/node');
+//const Sentry = require('./sentry-javascript/sentry-javascript/packages/node');
+const Sentry = require('@sentry/node')
 const app = express();
 const SPAN_LIMIT = 1000;
 const port = 3000; // You can change this po jrt number if needed
@@ -28,9 +29,14 @@ app.get('/', (req, res) => {
 
 
 app.get("/expensive-function", (req, res) => {
-
-  for (let x = 0; x < 2094; x++) {
+  //console.log(req)
+  /*for (let x = 0; x < 10; x++) {
     spanManager.createSpan('processing');  // Reuse the createSpan method for each iteration
+  };*/
+  
+  for (let x = 0; x < 1400; x++) {
+    const span = Sentry.startInactiveSpan({name: "processing"});
+    span.end()
   }
   
   res.send("hello world")
@@ -47,7 +53,7 @@ app.post('/webhook', (req, res) => {
 })
 
 app.get('/test-spans', (req, res) => {
-  for (let x = 0; x < 2000; x++){
+  for (let x = 0; x < 500; x++){
     console.log('running for: ', x);
     const result = Sentry.startSpan({name: "Important Function"}, () => {
       return doMath();

@@ -4,7 +4,7 @@ const Sentry = require('@sentry/node');
 const app = express();
 app.use(express.json());
 
-const MAX_SPANS_PER_TRACE = 2;
+const MAX_SPANS_PER_TRACE = 1000;
 const traceSpanCounts = new Map();
 
 // Endpoint to receive Sentry events from other services
