@@ -4,54 +4,49 @@ const { TransportWrapper, SpanTransport } = require('./TransportWrapper');
 const Logger = require('./logger');
 
 class SentryWrapper {
-    traceMap = null;
+    spanMap = null;
 
     init(options){
         const transportWrapper = new TransportWrapper(this);
         this.client = Sentry.init({...options, transport: transportWrapper });
         //this.client = Sentry.init(options);
-        this.traceMap = new Map();
+        this.spanMap = new Map();
         this.client.on("spanEnd", (span) => {
-            this.onSpanEnd(this.getTraceMap(), span)
+            this.onSpanEnd(this.getSpanMap(), span)
         })
     }
 
-    onSpanEnd(traceMap, span) {
-        // This will also store an additional span which is the trace span itself
-        // Maybe consider removing the first index of this Map
-        const activeSpan = Sentry.getActiveSpan();
-        
-        if (activeSpan) {
-            const context = activeSpan.spanContext();
-            const traceId = context.traceId;
+    onSpanEnd(spanMap, span) {
+        if (span) {
+            const parentID = span["parentSpanId"]
 
-            if (traceId) {
+            if (parentID) {
                 let spans = []
-                if (traceMap.has(traceId)) {
-                    spans = traceMap.get(traceId);
+                if (spanMap.has(parentID)) {
+                    spans = spanMap.get(parentID);
                 }
                 
                 spans.push(span)
-                traceMap.set(traceId, spans)
+                spanMap.set(parentID, spans)
             }
         }
     }
 
-    getTraceMap() {
-        return this.traceMap;
+    getSpanMap() {
+        return this.spanMap;
     }
 
-    getSpansByTraceID(traceID) {
-        for (const [key, value] of this.traceMap.entries()) {
-            if (key == traceID) {
+    getChildSpans(parentID) {
+        for (const [key, value] of this.spanMap.entries()) {
+            if (key == parentID) {
                 return value;
             }
         }
         return null;
     }
 
-    printTraceMap(){
-        for (const [key, value] of this.traceMap.entries()) {
+    printSpanMap(){
+        for (const [key, value] of this.spanMap.entries()) {
             for (const span of value) {
                 console.log(span)
             }
